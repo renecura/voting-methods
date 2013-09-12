@@ -1,26 +1,28 @@
 package net.renecura.voting;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+import net.renecura.voting.alternatives.Alternative;
+import net.renecura.voting.alternatives.AlternativeSet;
+
 public final class Ordering {
 	
 	private SortedSet<Double> utilities;
-	private HashMap<Double, ArrayList<Alternative>> alternatives;
+	private HashMap<Double, AlternativeSet> alternatives;
 	
-	private ArrayList<Alternative> alts;
+	private AlternativeSet alts;
 	
-	private Preference p;
+	private Utility p;
 	
-	public Ordering(Preference p){
-		alternatives = new HashMap<Double, ArrayList<Alternative>>();
+	public Ordering(Utility p){
+		alternatives = new HashMap<Double, AlternativeSet>();
 		utilities = new ConcurrentSkipListSet<Double>();
 		
-		alts = new ArrayList<Alternative>(); 
+		alts = new AlternativeSet(); 
 		
 		this.p = p;
 	}
@@ -46,7 +48,7 @@ public final class Ordering {
 		
 		Iterator<Alternative> aIt = this.alts.iterator();
 		Alternative alt;
-		ArrayList<Alternative> list;
+		AlternativeSet list;
 		Double u;
 		
 		// Vacia los ordenamientos previos.
@@ -62,7 +64,7 @@ public final class Ordering {
 			list = alternatives.get(u);
 			
 			if (list == null){
-				list = new ArrayList<Alternative>();
+				list = new AlternativeSet();
 				alternatives.put(u, list);
 			}
 			
@@ -77,7 +79,7 @@ public final class Ordering {
 	 * @param index Posición en el ordenamiento.
 	 * @return Lista de alternativas en la posición.
 	 */
-	public ArrayList<Alternative> position(int index){
+	public AlternativeSet position(int index){
 		
 		if (alts.isEmpty()) return null;
 		if(index >= utilities.size()) throw new IndexOutOfBoundsException("Index value: "+index); 
@@ -94,7 +96,7 @@ public final class Ordering {
 	 * Recupera la lista de alternativas en la primera posición.
 	 * @return Lista de alternativas en la primera posición.
 	 */
-	public ArrayList<Alternative> first(){
+	public AlternativeSet first(){
 		if (alts.isEmpty()) return null;
 		
 		reorder();
@@ -105,7 +107,7 @@ public final class Ordering {
 	 * Recupera la lista de alternativas en la última posición.
 	 * @return Lista de alternativas en la última posición.
 	 */
-	public ArrayList<Alternative> last(){
+	public AlternativeSet last(){
 		if (alts.isEmpty()) return null;
 		
 		reorder();
