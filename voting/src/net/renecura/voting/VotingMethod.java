@@ -18,12 +18,11 @@ public abstract class VotingMethod {
 		this.alternatives = set;
 		
 		this.ballot = new BallotBox();
-		this.welfare = new Ordering(this.ballot);
+		this.welfare = new Ordering(this.alternatives, this.ballot);
 	}
 	
 	public void addPreference(Utility preference){
-		Ordering ord = new Ordering(preference);			
-		ord.addAlternatives(this.alternatives);
+		Ordering ord = new Ordering(this.alternatives, preference);
 		this.individualOrd.add(ord);
 	}
 	
