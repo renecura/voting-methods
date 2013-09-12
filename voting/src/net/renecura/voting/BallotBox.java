@@ -12,7 +12,7 @@ public class BallotBox implements Utility {
     public BallotBox() {
         this.votes = new ConcurrentHashMap<Alternative, Integer>();
     }
-
+  
     public int vote(Alternative alt){
     	return vote(alt, 1);
     }
