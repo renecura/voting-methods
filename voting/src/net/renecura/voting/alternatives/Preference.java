@@ -1,15 +1,10 @@
-package net.renecura.voting;
+package net.renecura.voting.alternatives;
 
-public class Preference {
+import net.renecura.voting.Utility;
 
-	private Ordering ordering;
-	
+public class Preference implements Utility{
+
 	public Preference(){
-		this.ordering = new Ordering(this);
-	}
-	
-	public Ordering getOrdering(){
-		return this.ordering;
 	}
 	
 	/**
@@ -17,8 +12,9 @@ public class Preference {
 	 * @param alt Alternative Alternativa a evaluar.
 	 * @return Utilidad de la alternativa.
 	 */
+	@Override
 	public double utility(Alternative alt){
-		return Double.longBitsToDouble(alt.getValue());
+		return 0;
 	}
 	
 	

@@ -1,26 +1,36 @@
 package net.renecura.voting;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+
+import net.renecura.voting.alternatives.Alternative;
+import net.renecura.voting.alternatives.AlternativeSet;
 
 public abstract class VotingMethod {
 
-	protected ArrayList<Preference> preferences;
-	protected ArrayList<Alternative> alternatives;
+	protected AlternativeSet alternatives;
+	protected ArrayList<Ordering> individualOrd;
 	
-	public VotingMethod(ArrayList<Alternative> alternatives, ArrayList<Preference> preferences){
-		this.preferences = preferences;
-		this.alternatives = alternatives;
+	protected BallotBox ballot;
+	protected Ordering welfare;
+	
+	public VotingMethod(AlternativeSet set){		
+		this.individualOrd = new ArrayList<Ordering>();
+		this.alternatives = set;
 		
-		Iterator<Preference> pIt = preferences.iterator();
-		
-		while(pIt.hasNext()){
-			pIt.next().getOrdering().addAlternatives(this.alternatives);
-		}
-		
+		this.ballot = new BallotBox();
+		this.welfare = new Ordering(this.alternatives, this.ballot);
 	}
 	
-	abstract public ArrayList<Alternative> choose();
+	public void addPreference(Utility preference){
+		Ordering ord = new Ordering(this.alternatives, preference);
+		this.individualOrd.add(ord);
+	}
+	
+	public String toString(){
+		return "Ballot: "+this.ballot + " | Welfare: " + this.welfare;
+	}
+	
+	abstract public AlternativeSet choose();
 
 	abstract public Alternative chooseOne();
 
