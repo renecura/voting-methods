@@ -1,129 +1,126 @@
 package net.renecura.voting;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+
+import net.renecura.voting.alternatives.Alternative;
+import net.renecura.voting.alternatives.AlternativeSet;
 
 public final class Ordering {
 	
-	private SortedSet<Double> utilities;
-	private HashMap<Double, ArrayList<Alternative>> alternatives;
+	private AlternativeSet set;
 	
-	private ArrayList<Alternative> alts;
+	private Utility preference;
 	
-	private Preference p;
-	
-	public Ordering(Preference p){
-		alternatives = new HashMap<Double, ArrayList<Alternative>>();
-		utilities = new ConcurrentSkipListSet<Double>();
+	public Ordering(AlternativeSet set, Utility preference){
 		
-		alts = new ArrayList<Alternative>(); 
+		this.set = set;
+		this.preference = preference;
 		
-		this.p = p;
+		//this.alternatives = new HashMap<Double, AlternativeSet>();
+		//this.utilities = new ConcurrentSkipListSet<Double>();
+		
 	}
 
-	public void addAlternative(Alternative alt) {
-		alts.add(alt);		
-	}
-	
-	public void addAlternatives(Collection<Alternative> c) {
-		Iterator<Alternative> it = c.iterator();
+	public Map<Double, AlternativeSet> utilityMap(){
 		
-		while(it.hasNext())
-			this.addAlternative(it.next());		
-	}
-	
-	/**
-	 * Reordena las alternativas debido a que la utilidad de las preferencias puede cambiar en tiempo de ejecución.
-	 * Este metodo debe ser invocado por todas las funciones de recupero.
-	 */
-	private void reorder(){
+		// Si el conjunto de alternativas estaá vacion retorna null.
+		if (this.set.isEmpty()) return null;
 		
-		if (this.alts.isEmpty()) return;
+		Map<Double, AlternativeSet> map = new ConcurrentHashMap<Double, AlternativeSet>();
+		Iterator<Alternative> aIt = this.set.iterator();
 		
-		Iterator<Alternative> aIt = this.alts.iterator();
+		AlternativeSet subset;
 		Alternative alt;
-		ArrayList<Alternative> list;
-		Double u;
+		Double u; // Utilidad
 		
-		// Vacia los ordenamientos previos.
-		alternatives.clear();
-		utilities.clear();
-		
-		// Reconstruye el ordenamiento.
-		while (aIt.hasNext()){
-			
+		// Construye el mapa de utilidades.
+		while (aIt.hasNext()) {
+
 			alt = aIt.next();
-			
-			u = Double.valueOf(p.utility(alt));
-			list = alternatives.get(u);
-			
-			if (list == null){
-				list = new ArrayList<Alternative>();
-				alternatives.put(u, list);
+
+			u = preference.utility(alt);
+			subset =  map.get(u);
+
+			// Si el subset es null, lo crea.
+			if (subset == null) {
+				subset = new AlternativeSet();
+				map.put(u, subset);
 			}
-			
-			list.add(alt);
-			utilities.add(u);			
+
+			subset.add(alt);
 		}
 		
+		return map;
 	}
-
+	
+	public SortedSet<Double> utilitySet(Map<Double, AlternativeSet> map){
+		SortedSet<Double> uSet = new ConcurrentSkipListSet<Double>(new UtilityComparator());
+		
+		uSet.addAll(map.keySet());
+		
+		return uSet;
+	}
+	
 	/**
 	 * Retorna la lista de alternativas correspondientes a la posición relativa dentro del ordenamiento.
 	 * @param index Posición en el ordenamiento.
 	 * @return Lista de alternativas en la posición.
 	 */
-	public ArrayList<Alternative> position(int index){
+	public AlternativeSet position(int index){
 		
-		if (alts.isEmpty()) return null;
-		if(index >= utilities.size()) throw new IndexOutOfBoundsException("Index value: "+index); 
+		if (set.isEmpty()) return null;
+				
+		Map<Double, AlternativeSet> uMap = utilityMap();
+		SortedSet<Double> uSet = utilitySet(uMap);
 		
-		reorder();
+		if(index >= uSet.size()) throw new IndexOutOfBoundsException("Index value: "+index); 
 		
-		Double u[] = new Double[utilities.size()];
-		utilities.toArray(u);
+		Double u[] = new Double[uSet.size()];
+		uSet.toArray(u);
 		
-		return alternatives.get(u[index]);
+		return uMap.get(u[index]);
 	}	
 	
 	/**
 	 * Recupera la lista de alternativas en la primera posición.
 	 * @return Lista de alternativas en la primera posición.
 	 */
-	public ArrayList<Alternative> first(){
-		if (alts.isEmpty()) return null;
+	public AlternativeSet first(){
+		if (set.isEmpty()) return null;
 		
-		reorder();
-		return alternatives.get(utilities.first());
+		Map<Double, AlternativeSet> uMap = utilityMap();
+		SortedSet<Double> uSet = utilitySet(uMap);
+		
+		return uMap.get(uSet.first());
 	}
 	
 	/**
 	 * Recupera la lista de alternativas en la última posición.
 	 * @return Lista de alternativas en la última posición.
 	 */
-	public ArrayList<Alternative> last(){
-		if (alts.isEmpty()) return null;
+	public AlternativeSet last(){
 		
-		reorder();
-		return alternatives.get(utilities.last()); 
+		if (set.isEmpty()) return null;
+		
+		Map<Double, AlternativeSet> uMap = utilityMap();
+		SortedSet<Double> uSet = utilitySet(uMap);
+		
+		return uMap.get(uSet.last()); 
 	}
 	
-
-	/**
-	 * Remueve una alternativa de la lista de alternativas.
-	 * @warning Implementación prototipo, usar bajo su propio riesgo.
-	 * @param alt
-	 */
-	public void removeAlternative(Alternative alt) {
-		this.alts.remove(alt);		
-	}
 	
 	public String toString() {
-		Iterator<Double> uIt = utilities.iterator();
+		
+		if (set.isEmpty()) return "[empty]";
+		
+		Map<Double, AlternativeSet> uMap = utilityMap();
+		SortedSet<Double> uSet = utilitySet(uMap);
+		
+		Iterator<Double> uIt = uSet.iterator();
 		Iterator<Alternative> aIt;
 		
 		Double u;
@@ -137,7 +134,7 @@ public final class Ordering {
 			
 			s += i + " (" + u.doubleValue() + ") : ";
 			
-			aIt = alternatives.get(u).iterator();
+			aIt = uMap.get(u).iterator();
 			
 			while(aIt.hasNext()){
 				s += aIt.next() + "; ";
