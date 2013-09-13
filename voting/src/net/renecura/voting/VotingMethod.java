@@ -26,6 +26,10 @@ public abstract class VotingMethod {
 		this.individualOrd.add(ord);
 	}
 	
+	public String toString(){
+		return "Ballot: "+this.ballot + " | Welfare: " + this.welfare;
+	}
+	
 	abstract public AlternativeSet choose();
 
 	abstract public Alternative chooseOne();

@@ -11,9 +11,6 @@ import net.renecura.voting.alternatives.AlternativeSet;
 
 public final class Ordering {
 	
-	//private SortedSet<Double> utilities;
-	//private HashMap<Double, AlternativeSet> alternatives;
-	
 	private AlternativeSet set;
 	
 	private Utility preference;
@@ -61,7 +58,7 @@ public final class Ordering {
 	}
 	
 	public SortedSet<Double> utilitySet(Map<Double, AlternativeSet> map){
-		SortedSet<Double> uSet = new ConcurrentSkipListSet<Double>();
+		SortedSet<Double> uSet = new ConcurrentSkipListSet<Double>(new UtilityComparator());
 		
 		uSet.addAll(map.keySet());
 		

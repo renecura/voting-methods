@@ -35,5 +35,9 @@ public class BallotBox implements Utility {
 	public double utility(Alternative alt) {
 		return (this.votes.containsKey(alt))? this.votes.get(alt).intValue(): 0;
 	}
+	
+	public String toString(){
+		return this.votes.toString();
+	}
 
 }
