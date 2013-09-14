@@ -23,6 +23,5 @@ public class RgbColorDistancePreference implements Utility {
 		return 765 - ( Math.abs( rgb[0] - this.color.getRed() ) + 
 				Math.abs( rgb[1] - this.color.getGreen() ) +
 				Math.abs( rgb[2] - this.color.getBlue() ) );
-	}
-
+	}	
 }

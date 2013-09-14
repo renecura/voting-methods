@@ -24,8 +24,12 @@ public class RgbColorAlternative implements Alternative {
 		
 		return rgb;
 	}
-	
+
+	public Color getColor() {
+		return color;
+	}	
 	public String toString(){
 		return descriptor;
 	}
+
 }
