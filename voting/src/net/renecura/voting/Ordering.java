@@ -145,5 +145,9 @@ public final class Ordering {
 		
 		return s + "]";
 	}
+
+	public Utility getPreference() {
+		return preference;
+	}
 	
 }
